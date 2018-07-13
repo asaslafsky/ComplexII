@@ -1,11 +1,11 @@
 # import the pysb module and all its methods and functions
+import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import numpy as np
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
 from pysb import *
-import matplotlib
-matplotlib.use('Agg')
 #import random
 
 # instantiate a model
