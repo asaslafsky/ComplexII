@@ -4,6 +4,8 @@ import numpy as np
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
 from pysb import *
+import matplotlib
+matplotlib.use('Agg')
 #import random
 
 # instantiate a model
