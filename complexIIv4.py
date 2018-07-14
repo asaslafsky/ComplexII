@@ -8,6 +8,9 @@ from pysb.simulator import ScipyOdeSimulator
 from pysb import *
 #import random
 
+#Gives Titles to Saved Graphs
+run_type = 'Test 1,000 runs'
+
 # instantiate a model
 Model ()
 
@@ -151,6 +154,7 @@ Observable('obsComplexIIb', TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, 
 
 #LENGTH OF SIMULATION
 tspan = np.linspace(0, 4320, 4321) #Length of sim (start, stop, number of samples to generate). 4320 min, 72 hours.
+plt.ioff()
 
 #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
 ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
@@ -164,6 +168,7 @@ for obs in model.observables:
     plt.xlabel("Time (in hr)", fontsize=15)
     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
     plt.title('%s Trajectories' % obs.name)
+    plt.savefig('%s: SSA %s' % (run_type, obs.name), bbox_inches='tight')
 
 # #RUN ODE SIMULATION
 # ode_sim = ScipyOdeSimulator(model, tspan=tspan)
@@ -175,6 +180,7 @@ for obs in model.observables:
 #     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
 #     plt.title('%s Trajectories' % obs.name)
 #     plt.legend(loc='best')
+#     plt.savefig('%s: ODE %s' % (run_type, obs.name), bbox_inches='tight')
 
 # FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT
 avg = df.groupby(level='time').mean()
@@ -186,6 +192,7 @@ for obs in model.observables:
     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
     plt.title('Average SSA %s Trajectories' % obs.name)
     plt.legend(loc='best')
+    plt.savefig('%s: Average SSA %s' % (run_type, obs.name), bbox_inches='tight')
 
 #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
 all_times = [1440, 2880, 4320] #Array of time points of interest: 24, 48, 72
@@ -201,11 +208,12 @@ for t_point in all_times:
           plt.ylabel("Frequency", fontsize=15)
           plt.title('Density Plot for %s at %d Hour(s)' % (obs.name, t_point/60))
           plt.legend(loc='best')
+          plt.savefig('%s: SSA variable timepoint %d for %s' % (run_type, t_point, obs.name), bbox_inches='tight')
 
 # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
 # for t_point in all_times:
 #      for obs in model.observables:
 #           print("At %d hour(s) %s amount is %d molecules/cell" % (t_point/60, obs.name, ode_sim_res.observables[obs.name][t_point]))
 
-plt.show()
+#plt.show()
 
