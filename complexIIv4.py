@@ -194,21 +194,21 @@ for obs in model.observables:
     plt.legend(loc='best')
     plt.savefig('%s: Average SSA %s' % (run_type, obs.name), bbox_inches='tight')
 
-#AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
-all_times = [1440, 2880, 4320] #Array of time points of interest: 24, 48, 72
-
-for t_point in all_times:
-     for obs in model.observables:
-          plt.figure()
-          for _, run in df.groupby('simulation'):
-               run['Index'] = range(0, len(run))
-               time = run.loc[run['Index'] == t_point]
-               plt.hist(time.loc[:, obs.name], density=True, histtype='stepfilled')
-          plt.xlabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-          plt.ylabel("Frequency", fontsize=15)
-          plt.title('Density Plot for %s at %d Hour(s)' % (obs.name, t_point/60))
-          plt.legend(loc='best')
-          plt.savefig('%s: SSA variable timepoint %d for %s' % (run_type, t_point, obs.name), bbox_inches='tight')
+# #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
+# all_times = [1440, 2880, 4320] #Array of time points of interest: 24, 48, 72
+#
+# for t_point in all_times:
+#      for obs in model.observables:
+#           plt.figure()
+#           for _, run in df.groupby('simulation'):
+#                run['Index'] = range(0, len(run))
+#                time = run.loc[run['Index'] == t_point]
+#                plt.hist(time.loc[:, obs.name], density=True, histtype='stepfilled')
+#           plt.xlabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
+#           plt.ylabel("Frequency", fontsize=15)
+#           plt.title('Density Plot for %s at %d Hour(s)' % (obs.name, t_point/60))
+#           plt.legend(loc='best')
+#           plt.savefig('%s: SSA variable timepoint %d for %s' % (run_type, t_point, obs.name), bbox_inches='tight')
 
 # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
 # for t_point in all_times:
