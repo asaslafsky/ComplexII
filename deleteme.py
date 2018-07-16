@@ -266,7 +266,7 @@ for sim_num, run in df.groupby('simulation'):
     for t_point in all_times:
         obs_row = run.loc[run['Index'] == t_point]
         for obs in model.observables:
-            df_dens_plot.add(obs_row.loc[:, obs.name], index=[t_point, sim_num], columns=obs.name)
+            df_dens_plot.add(index=[t_point, sim_num], columns=obs.name, fill_value=obs_row.loc[:, obs.name],)
 
 print(df_dens_plot)
 
