@@ -1,9 +1,8 @@
 # pysb.pathfinder.set_path(ariella/anaconda3/envs/pysb/lib/stochkit)
 
 # import the pysb module and all its methods and functions
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 import numpy as np
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
