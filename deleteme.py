@@ -253,20 +253,29 @@ df = ssa_sim_res.dataframe
 #     plt.savefig('%s: Average SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
 
 #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
-all_times = [720, 1440, 2880] #Array of time points of interest: 24, 48, 72
+all_times = ['720', '1440', '2880'] #Array of time points of interest: 24, 48, 72
 
 #Create dataframe
-idx = pd.MultiIndex.from_product([all_times, range(1, NUM_SSA_RUNS + 1)], names=['timepoint', 'simulation'])
-col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb']
-df_dens_plot = pd.DataFrame('', idx, col)
+idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
+col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb', 'obsMLKLa', 'obstBID']
+df_dens_plot = pd.DataFrame(np.nan, idx, col)
+# df_dens_plot['index'] = range(0, len(run))
+# print (df)
 
 #Fill in dataframe to plot
 for sim_num, run in df.groupby('simulation'):
-    run['Index'] = range(0, len(run))
-    for t_point in all_times:
-        obs_row = run.loc[run['Index'] == t_point]
+     # print(run.head())
+     # run['index'] = range(0, len(run))
+     for t_point in all_times:
+        run_row = run.loc[run['time'] == t_point]
         for obs in model.observables:
-            df_dens_plot.add(index=[t_point, sim_num], columns=obs.name, fill_value=obs_row.loc[:, obs.name],)
+             # print(t_point)
+             # print(obs.name)
+             dens_plot_time = df_dens_plot.loc[df_dens_plot['timepoint'] == t_point]
+             dens_plot_row = dens_plot_time.loc[dens_plot_time['simulation'] == sim_run]
+             dens_plot_row.loc[obs.name] = run_row.loc[obs.name]
+             # df_dens_plot.loc([(t_point, sim_run)], [obs.name]) = obs_row.loc[:, obs.name]
+            # df_dens_plot.add(fill_value=obs_row.loc[:, obs.name], axis={[t_point, sim_num], obs.name, })
 
 print(df_dens_plot)
 

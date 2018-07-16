@@ -10,8 +10,8 @@ from pysb import *
 #import random
 
 # Definitions
-RUN_TYPE = 'Test 1000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
-NUM_SSA_RUNS = 1000 #How many times SSA will be ran
+RUN_TYPE = 'Test 10,000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
+NUM_SSA_RUNS = 10000 #How many times SSA will be ran
 
 # instantiate a model
 Model()
