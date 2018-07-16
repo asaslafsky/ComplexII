@@ -11,8 +11,8 @@ from pysb import *
 #import random
 
 # Definitions
-RUN_TYPE = 'Test 1000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
-NUM_SSA_RUNS = 1000 #How many times SSA will be ran
+RUN_TYPE = 'Test 10,000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
+NUM_SSA_RUNS = 10000 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -218,57 +218,56 @@ ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
 ssa_sim_res = ssa_sim.run(n_runs=NUM_SSA_RUNS)
 df = ssa_sim_res.dataframe
 
-for obs in model.observables:
-    plt.figure()
-    for _, run in df.groupby('simulation'):  #groupby returns tuple: index and run
-            plt.plot(tspan / 60, run.loc[:, obs.name])
-    plt.xlabel("Time (in hr)", fontsize=15)
-    plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-    plt.title('%s Trajectories' % obs.name)
-    plt.savefig('%s: SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
+# for obs in model.observables:
+#     plt.figure()
+#     for _, run in df.groupby('simulation'):  #groupby returns tuple: index and run
+#             plt.plot(tspan / 60, run.loc[:, obs.name])
+#     plt.xlabel("Time (in hr)", fontsize=15)
+#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
+#     plt.title('%s Trajectories' % obs.name)
+#     plt.savefig('%s: SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
 
-#RUN ODE SIMULATION
-ode_sim = ScipyOdeSimulator(model, tspan=tspan)
-ode_sim_res = ode_sim.run()
+# #RUN ODE SIMULATION
+# ode_sim = ScipyOdeSimulator(model, tspan=tspan)
+# ode_sim_res = ode_sim.run()
+# for obs in model.observables:
+#     plt.figure()
+#     plt.plot(tspan / 60, ode_sim_res.observables[obs.name], label='100 ng/ml TNF')
+#     plt.xlabel("Time (in hr)", fontsize=15)
+#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
+#     plt.title('%s Trajectories' % obs.name)
+#     plt.legend(loc='best')
+#     plt.savefig('%s: ODE %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
 
-for obs in model.observables:
-    plt.figure()
-    plt.plot(tspan / 60, ode_sim_res.observables[obs.name], label='100 ng/ml TNF')
-    plt.xlabel("Time (in hr)", fontsize=15)
-    plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-    plt.title('%s Trajectories' % obs.name)
-    plt.legend(loc='best')
-    plt.savefig('%s: ODE %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
-
-# FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT
-avg = df.groupby(level='time').mean()
-
-for obs in model.observables:
-    plt.figure()
-    plt.plot(tspan / 60, avg.loc[:, obs.name])
-    plt.xlabel("Time (in hr)", fontsize=15)
-    plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-    plt.title('Average SSA %s Trajectories' % obs.name)
-    plt.legend(loc='best')
-    plt.savefig('%s: Average SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
-
-# #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
-# all_times = [720, 1440, 2880] #Array of time points of interest: 24, 48, 72
+# # FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT
+# avg = df.groupby(level='time').mean()
 #
-# #Create dataframe
-# idx = MultiIndex.from_product([all_times, range(1, NUM_SSA_RUNS + 1)], names=['timepoint', 'simulation'])
-# col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb']
-# df_dens_plot = pd.DataFrame('', idx, col)
-#
-# #Fill in dataframe to plot
-# for sim_num, run in df.groupby('simulation'):
-#     run['Index'] = range(0, len(run))
-#     for t_point in all_times:
-#         obs_row = run.loc[run['Index'] == t_point]
-#         for obs in model.observables:
-#             df_dens_plot.add(obs_row.loc[:, obs.name], index=[t_point, sim_num], columns=obs.name)
-#
-# print(df_dens_plot)
+# for obs in model.observables:
+#     plt.figure()
+#     plt.plot(tspan / 60, avg.loc[:, obs.name])
+#     plt.xlabel("Time (in hr)", fontsize=15)
+#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
+#     plt.title('Average SSA %s Trajectories' % obs.name)
+#     plt.legend(loc='best')
+#     plt.savefig('%s: Average SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
+
+#AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
+all_times = [720, 1440, 2880] #Array of time points of interest: 24, 48, 72
+
+#Create dataframe
+idx = MultiIndex.from_product([all_times, range(1, NUM_SSA_RUNS + 1)], names=['timepoint', 'simulation'])
+col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb']
+df_dens_plot = pd.DataFrame('', idx, col)
+
+#Fill in dataframe to plot
+for sim_num, run in df.groupby('simulation'):
+    run['Index'] = range(0, len(run))
+    for t_point in all_times:
+        obs_row = run.loc[run['Index'] == t_point]
+        for obs in model.observables:
+            df_dens_plot.add(obs_row.loc[:, obs.name], index=[t_point, sim_num], columns=obs.name)
+
+print(df_dens_plot)
 
 #Plot dataframe
 
