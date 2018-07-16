@@ -11,7 +11,7 @@ from pysb import *
 
 # Definitions
 RUN_TYPE = 'Test 1000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
-NUM_SSA_RUNS = 1000 #How many times SSA will be ran
+NUM_SSA_RUNS = 2 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -216,6 +216,8 @@ plt.ioff()
 ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
 ssa_sim_res = ssa_sim.run(n_runs=NUM_SSA_RUNS)
 df = ssa_sim_res.dataframe
+print(df.head())
+print(df.index.names)
 
 for obs in model.observables:
     plt.figure()

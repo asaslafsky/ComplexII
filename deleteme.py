@@ -7,12 +7,13 @@ import matplotlib.pyplot as plt
 import numpy as np
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
+import pandas as pd
 from pysb import *
 #import random
 
 # Definitions
 RUN_TYPE = 'Test 10,000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
-NUM_SSA_RUNS = 10000 #How many times SSA will be ran
+NUM_SSA_RUNS = 2 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -255,7 +256,7 @@ df = ssa_sim_res.dataframe
 all_times = [720, 1440, 2880] #Array of time points of interest: 24, 48, 72
 
 #Create dataframe
-idx = MultiIndex.from_product([all_times, range(1, NUM_SSA_RUNS + 1)], names=['timepoint', 'simulation'])
+idx = pd.MultiIndex.from_product([all_times, range(1, NUM_SSA_RUNS + 1)], names=['timepoint', 'simulation'])
 col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb']
 df_dens_plot = pd.DataFrame('', idx, col)
 
