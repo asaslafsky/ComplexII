@@ -11,7 +11,7 @@ from pysb import *
 
 # Definitions
 RUN_TYPE = 'Test 1000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
-NUM_SSA_RUNS = 2 #How many times SSA will be ran
+NUM_SSA_RUNS = 1000 #How many times SSA will be ran
 
 # instantiate a model
 Model()
