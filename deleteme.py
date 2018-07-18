@@ -214,43 +214,43 @@ Observable('obstBID', BID(c8=None, mod='trunc'))
 tspan = np.linspace(0, 2160, 2161) #Length of sim (start, stop, number of samples to generate). 4320 min, 72 hours.
 plt.ioff()
 
-#RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
-ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
-ssa_sim_res = ssa_sim.run(n_runs=NUM_SSA_RUNS)
-df = ssa_sim_res.dataframe
-
-for obs in model.observables:
-    plt.figure()
-    for _, run in df.groupby('simulation'):  #groupby returns tuple: index and run
-            plt.plot(tspan / 60, run.loc[:, obs.name])
-    plt.xlabel("Time (in hr)", fontsize=15)
-    plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-    plt.title('%s Trajectories' % obs.name)
-    plt.savefig('%s: SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
-
+# #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
+# ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
+# ssa_sim_res = ssa_sim.run(n_runs=NUM_SSA_RUNS)
+# df = ssa_sim_res.dataframe
+#
+# for obs in model.observables:
+#     plt.figure()
+#     for _, run in df.groupby('simulation'):  #groupby returns tuple: index and run
+#             plt.plot(tspan / 60, run.loc[:, obs.name])
+#     plt.xlabel("Time (in hr)", fontsize=15)
+#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
+#     plt.title('%s Trajectories' % obs.name)
+#     plt.savefig('%s: SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
+#
 # #RUN ODE SIMULATION
 ode_sim = ScipyOdeSimulator(model, tspan=tspan)
 ode_sim_res = ode_sim.run()
-for obs in model.observables:
-    plt.figure()
-    plt.plot(tspan / 60, ode_sim_res.observables[obs.name], label='100 ng/ml TNF')
-    plt.xlabel("Time (in hr)", fontsize=15)
-    plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-    plt.title('%s Trajectories' % obs.name)
-    plt.legend(loc='best')
-    plt.savefig('%s: ODE %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
-
-# FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT
-avg = df.groupby(level='time').mean()
-
-for obs in model.observables:
-    plt.figure()
-    plt.plot(tspan / 60, avg.loc[:, obs.name])
-    plt.xlabel("Time (in hr)", fontsize=15)
-    plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-    plt.title('Average SSA %s Trajectories' % obs.name)
-    plt.legend(loc='best')
-    plt.savefig('%s: Average SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
+# for obs in model.observables:
+#     plt.figure()
+#     plt.plot(tspan / 60, ode_sim_res.observables[obs.name], label='100 ng/ml TNF')
+#     plt.xlabel("Time (in hr)", fontsize=15)
+#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
+#     plt.title('%s Trajectories' % obs.name)
+#     plt.legend(loc='best')
+#     plt.savefig('%s: ODE %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
+#
+# # FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT
+# avg = df.groupby(level='time').mean()
+#
+# for obs in model.observables:
+#     plt.figure()
+#     plt.plot(tspan / 60, avg.loc[:, obs.name])
+#     plt.xlabel("Time (in hr)", fontsize=15)
+#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
+#     plt.title('Average SSA %s Trajectories' % obs.name)
+#     plt.legend(loc='best')
+#     plt.savefig('%s: Average SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
 
 
 # #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
@@ -280,7 +280,7 @@ for obs in model.observables:
 #           plt.savefig('%s: Probability Density Function at %d Hour(s) for %s' % (RUN_TYPE, t_point, obs.name), bbox_inches='tight')
 
 
-# #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
-# for t_point in all_times:
-#      for obs in model.observables:
-#           print("At %d hour(s) %s amount is %d molecules/cell" % (t_point/60, obs.name, ode_sim_res.observables[obs.name][t_point]))
+#DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
+for t_point in all_times:
+     for obs in model.observables:
+          print("At %d hour(s) %s amount is %d molecules/cell" % (t_point/60, obs.name, ode_sim_res.observables[obs.name][t_point]))
