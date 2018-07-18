@@ -211,6 +211,9 @@ Observable('obstBID', BID(c8=None, mod='trunc'))
 tspan = np.linspace(0, 2160, 2161) #Length of sim (start, stop, number of samples to generate). 4320 min, 72 hours.
 plt.ioff()
 
+#Set Path to save figures
+path = '/home/asasla/main/ComplexII/'
+
 #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
 ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
 ssa_sim_res = ssa_sim.run(n_runs=NUM_SSA_RUNS)
@@ -223,7 +226,7 @@ for obs in model.observables:
     plt.xlabel("Time (in hr)", fontsize=15)
     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
     plt.title('%s SSA Trajectories: %s' % (obs.name, RUN_TYPE))
-    plt.savefig('%s SSA: %s' % (obs.name, RUN_TYPE), bbox_inches='tight')
+    plt.savefig(path + '%s_SSA:_%s/' % (obs.name, RUN_TYPE), bbox_inches='tight')
 
 #RUN ODE SIMULATION
 ode_sim = ScipyOdeSimulator(model, tspan=tspan)
@@ -234,7 +237,7 @@ for obs in model.observables:
     plt.xlabel("Time (in hr)", fontsize=15)
     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
     plt.title('%s ODE Trajectories: %s' % (obs.name, RUN_TYPE))
-    plt.savefig('%s ODE: %s' % (obs.name, RUN_TYPE), bbox_inches='tight')
+    plt.savefig(path + '%s_ODE:_%s/' % (obs.name, RUN_TYPE), bbox_inches='tight')
 
 
 # FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT
@@ -246,7 +249,7 @@ for obs in model.observables:
     plt.xlabel("Time (in hr)", fontsize=15)
     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
     plt.title('%s Average SSA Trajectories: %s' % (obs.name, RUN_TYPE))
-    plt.savefig('%s Average SSA: %s' % (obs.name, RUN_TYPE), bbox_inches='tight')
+    plt.savefig(path + '%s_Average_SSA:_%s/' % (obs.name, RUN_TYPE), bbox_inches='tight')
 
 
 #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
@@ -273,7 +276,7 @@ for t_point in all_times:
           plt.xlabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
           plt.ylabel("Density", fontsize=15)
           plt.title('%s Probability Density Function at %d Hours: %s' % (obs.name, t_point/60, RUN_TYPE))
-          plt.savefig('%s PDF at %d Hours: %s' % (obs.name, t_point/60, RUN_TYPE), bbox_inches='tight')
+          plt.savefig(path + '%s_PDF_at_%d_Hours:_%s/' % (obs.name, t_point/60, RUN_TYPE), bbox_inches='tight')
 
 
 # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
