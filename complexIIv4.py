@@ -2,7 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
-import numpy as npls
+import numpy as np
 import seaborn as sns
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
@@ -266,7 +266,7 @@ for tnf_title, dose in TNF_LOOP:
         for obs in model.observables:
             plt.figure()
             kde_array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
-            sns.distplot(kde_array, kde=True)
+            sns.distplot(kde_array[np.nonzero(kde_array)], kde=True)
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
             plt.title('%s Kernel Density Estimation at %d Hours' % (obs.name, t_point / 60), fontsize=18)
