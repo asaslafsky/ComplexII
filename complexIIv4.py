@@ -10,7 +10,7 @@ from pysb import *
 #import random
 
 # Definitions
-NUM_SSA_RUNS = 100 #How many times SSA will be ran
+NUM_SSA_RUNS = 2 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -211,11 +211,11 @@ Observable('obstBID', BID(c8=None, mod='trunc'))
 
 tspan = np.linspace(0, 2160, 2161) #Length of simulation
 plt.ioff() #turn off graph showing up
-path = '/home/asasla/main/ComplexII/' #Set Path to save figures
+# path = '/home/asasla/main/ComplexII/' #Set Path to save figures
 TNF_LOOP = [('100 ng/ml TNF', 2326), ('10 ng/ml TNF', 232), ('1 ng/ml TNF', 23), ('.1 ng/ml TNF', 2)]
 all_times = [420, 600, 1440, 2160] #Array of time points of interest to create a probability density function for, in minutes
 
-# path = '/Users/ariella/PycharmProjects/ComplexII/'
+path = '/Users/ariella/PycharmProjects/ComplexII/'
 # obs_plot_num = [('obsComplexI', 511), ('obsComplexIIa', 512), ('obsComplexIIb', 513), ('obsMLKLp', 514), ('obstBID', 515)] #Observable name, number for figure subplot
 
 #RUN THROUGH EACH AMOUNT OF TNF: HOW DOES THAT AFFECT SSA VS ODE
@@ -266,7 +266,8 @@ for tnf_title, dose in TNF_LOOP:
         for obs in model.observables:
             plt.figure()
             kde_array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
-            sns.distplot(kde_array[np.nonzero(kde_array)], kde=True)
+            if kde_array != []:
+                sns.distplot(kde_array[np.nonzero(kde_array)] * 2, kde=True)
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
             plt.title('%s Kernel Density Estimation at %d Hours' % (obs.name, t_point / 60), fontsize=18)
