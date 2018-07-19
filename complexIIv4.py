@@ -1,7 +1,7 @@
 # import the pysb module and all its methods and functions
 import pandas as pd
 import matplotlib.pyplot as plt
-plt.switch_backend('agg')
+# plt.switch_backend('agg')
 import numpy as np
 import seaborn as sns
 from pysb.simulator import StochKitSimulator
