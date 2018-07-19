@@ -239,13 +239,25 @@ for tnf_title, dose in TNF_LOOP:
         plt.figure()
         for _, run in df.groupby('simulation'):
                 plt.plot(tspan / 60, run.loc[:, obs.name])
-        plt.plot(tspan / 60, avg.loc[:, obs.name], 'blue', linewidth=2)
         plt.plot(tspan / 60, ode_sim_res.observables[obs.name], 'black', linewidth=3)
         plt.xlabel("Time (in hr)", fontsize=15)
         plt.ylabel("Molecules/Cell", fontsize=15)
         plt.title('%s Trajectories' % obs.name, fontsize=18)
         ssa_name = path + '%d_SSA_%s.png' % (dose, obs.name)
         plt.savefig(ssa_name, bbox_inches='tight')
+
+    # FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT VS ODE
+    avg = df.groupby(level='time').mean()
+
+    for obs in model.observables:
+        plt.figure()
+        plt.plot(tspan / 60, avg.loc[:, obs.name], 'blue')
+        plt.plot(tspan / 60, ode_sim_res.observables[obs.name], 'black')
+        plt.xlabel("Time (in hr)", fontsize=15)
+        plt.ylabel("Molecules/Cell", fontsize=15)
+        plt.title('%s Trajectories' % obs.name)
+        avg_ssa = path + '%d_Avg_%s' % (dose, obs.name)
+        plt.savefig(avg_ssa, bbox_inches='tight')
 
     #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
     # Create dataframe
