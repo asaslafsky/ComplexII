@@ -268,7 +268,6 @@ for tnf_title, dose in TNF_LOOP:
             array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
             kde_array = array[np.nonzero(array)]
             if len(kde_array) > 1:
-                print(kde_array)
                 sns.distplot(kde_array, kde=True)
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
