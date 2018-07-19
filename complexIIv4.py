@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 import numpy as np
 import seaborn as sns
-from scipy import stats
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
 from pysb import *
@@ -234,11 +233,12 @@ for tnf_title, dose in TNF_LOOP:
     ode_sim = ScipyOdeSimulator(model, tspan=tspan)
     ode_sim_res = ode_sim.run(initials={TNF(tnfr=None): dose})
 
-    #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH ODE
+    #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
     for obs in model.observables:
         plt.figure()
         for _, run in df.groupby('simulation'):
                 plt.plot(tspan / 60, run.loc[:, obs.name])
+        plt.plot(tspan / 60, avg.loc[:, obs.name], 'gold', linewidth=3)
         plt.plot(tspan / 60, ode_sim_res.observables[obs.name], 'black', linewidth=3)
         plt.xlabel("Time (in hr)", fontsize=15)
         plt.ylabel("Molecules/Cell", fontsize=15)
@@ -246,24 +246,12 @@ for tnf_title, dose in TNF_LOOP:
         ssa_name = path + '%d_SSA_%s.png' % (dose, obs.name)
         plt.savefig(ssa_name, bbox_inches='tight')
 
-    # FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT VS ODE
-    avg = df.groupby(level='time').mean()
-
-    for obs in model.observables:
-        plt.figure()
-        plt.plot(tspan / 60, avg.loc[:, obs.name], 'blue')
-        plt.plot(tspan / 60, ode_sim_res.observables[obs.name], 'black')
-        plt.xlabel("Time (in hr)", fontsize=15)
-        plt.ylabel("Molecules/Cell", fontsize=15)
-        plt.title('%s Trajectories' % obs.name)
-        avg_ssa = path + '%d_Avg_%s' % (dose, obs.name)
-        plt.savefig(avg_ssa, bbox_inches='tight')
 
     #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
     # Create dataframe
     idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
     col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb', 'obsMLKLp', 'obstBID']
-    df_dens_plot = pd.DataFrame(np.nan, idx, col)
+    df_dens_plot = pd.DataFrame(0, idx, col)
 
     # Fill in dataframe to plot
     for sim_num, run in df.groupby('simulation'):
@@ -277,7 +265,8 @@ for tnf_title, dose in TNF_LOOP:
     for t_point in all_times:
         for obs in model.observables:
             plt.figure()
-            sns.distplot(df_dens_plot.loc[[t_point], [obs.name]], kde=True)
+            kde_array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
+            sns.distplot(kde_array, kde=True)
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
             plt.title('%s Kernel Density Estimation at %d Hours' % (obs.name, t_point / 60), fontsize=18)
