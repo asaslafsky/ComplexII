@@ -259,15 +259,17 @@ for tnf_title, dose in TNF_LOOP:
             for obs in model.observables:
                 run_slice = run.loc[[(sim_num, t_point)], [obs.name]]
                 conc = run_slice.values[0]
-                df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
+                df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = int(conc)
 
     # Plot dataframe
     for t_point in all_times:
         for obs in model.observables:
             plt.figure()
-            kde_array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
-            if kde_array != []:
-                sns.distplot(kde_array[np.nonzero(kde_array)] * 2, kde=True)
+            array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
+            kde_array = array[np.nonzero(array)]
+            if len(kde_array) > 1:
+                print(kde_array)
+                sns.distplot(kde_array, kde=True)
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
             plt.title('%s Kernel Density Estimation at %d Hours' % (obs.name, t_point / 60), fontsize=18)
