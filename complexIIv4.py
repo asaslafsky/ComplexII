@@ -10,7 +10,7 @@ from pysb import *
 #import random
 
 # Definitions
-NUM_SSA_RUNS = 2 #How many times SSA will be ran
+NUM_SSA_RUNS = 100 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -211,11 +211,11 @@ Observable('obstBID', BID(c8=None, mod='trunc'))
 
 tspan = np.linspace(0, 2160, 2161) #Length of simulation
 plt.ioff() #turn off graph showing up
-# path = '/home/asasla/main/ComplexII/' #Set Path to save figures
+path = '/home/asasla/main/ComplexII/' #Set Path to save figures
 TNF_LOOP = [('100 ng/ml TNF', 2326), ('10 ng/ml TNF', 232), ('1 ng/ml TNF', 23), ('.1 ng/ml TNF', 2)]
 all_times = [420, 600, 1440, 2160] #Array of time points of interest to create a probability density function for, in minutes
 
-path = '/Users/ariella/PycharmProjects/ComplexII/'
+# path = '/Users/ariella/PycharmProjects/ComplexII/'
 # obs_plot_num = [('obsComplexI', 511), ('obsComplexIIa', 512), ('obsComplexIIb', 513), ('obsMLKLp', 514), ('obstBID', 515)] #Observable name, number for figure subplot
 
 #RUN THROUGH EACH AMOUNT OF TNF: HOW DOES THAT AFFECT SSA VS ODE
