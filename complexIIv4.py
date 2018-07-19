@@ -2,7 +2,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
-import numpy as np
+import numpy as npls
 import seaborn as sns
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
