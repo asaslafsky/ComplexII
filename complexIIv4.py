@@ -10,7 +10,7 @@ from pysb import *
 #import random
 
 # Definitions
-NUM_SSA_RUNS = 100 #How many times SSA will be ran
+NUM_SSA_RUNS = 10000 #How many times SSA will be ran
 
 # instantiate a model
 Model()
