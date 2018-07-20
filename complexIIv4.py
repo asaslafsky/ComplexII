@@ -208,17 +208,19 @@ Observable('obsComplexIIb', TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, 
 Observable('obsMLKLp', MLKL(rip3=None, mod='p'))
 Observable('obstBID', BID(c8=None, mod='trunc'))
 
+#Length of simulation
+tspan = np.linspace(0, 2160, 2161)
 
-tspan = np.linspace(0, 2160, 2161) #Length of simulation
-plt.ioff() #turn off graph showing up
-path = '/home/asasla/main/ComplexII/' #Set Path to save figures
-TNF_LOOP = [('100 ng/ml TNF', 2326), ('10 ng/ml TNF', 232), ('1 ng/ml TNF', 23), ('.1 ng/ml TNF', 2)]
-all_times = [420, 600, 1440, 2160] #Array of time points of interest to create a probability density function for, in minutes
+#turn off graphs showing up
+plt.ioff()
 
+#Set Path to save figures
+path = '/home/asasla/main/ComplexII/'
 # path = '/Users/ariella/PycharmProjects/ComplexII/'
-# obs_plot_num = [('obsComplexI', 511), ('obsComplexIIa', 512), ('obsComplexIIb', 513), ('obsMLKLp', 514), ('obstBID', 515)] #Observable name, number for figure subplot
 
 #RUN THROUGH EACH AMOUNT OF TNF: HOW DOES THAT AFFECT SSA VS ODE
+TNF_LOOP = [('100 ng/ml TNF', 2326), ('10 ng/ml TNF', 232), ('1 ng/ml TNF', 23), ('.1 ng/ml TNF', 2)]
+
 for tnf_title, dose in TNF_LOOP:
 
     #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
@@ -234,21 +236,27 @@ for tnf_title, dose in TNF_LOOP:
     ode_sim_res = ode_sim.run(initials={TNF(tnfr=None): dose})
 
     #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
-    for obs in model.observables:
+    # Array: [(Observable name, number to start y axis at, number to end y axis at)]
+    obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 5500)]
+
+    for obs, y1, y2 in obs_y_range:
         plt.figure()
+        plt.ylim(y1, y2)
         for _, run in df.groupby('simulation'):
-                plt.plot(tspan / 60, run.loc[:, obs.name])
-        plt.plot(tspan / 60, avg.loc[:, obs.name], 'gold', linewidth=3)
-        plt.plot(tspan / 60, ode_sim_res.observables[obs.name], 'black', linewidth=3)
+                plt.plot(tspan / 60, run.loc[:, obs])
+        plt.plot(tspan / 60, avg.loc[:, obs], 'gold', linewidth=3)
+        plt.plot(tspan / 60, ode_sim_res.observables[obs], 'black', linewidth=3, linestyle='dashed')
         plt.xlabel("Time (in hr)", fontsize=15)
         plt.ylabel("Molecules/Cell", fontsize=15)
-        plt.title('%s Trajectories' % obs.name, fontsize=18)
-        ssa_name = path + 'run2_%d_SSA_%s.png' % (dose, obs.name)
+        plt.title('%s Trajectories' % obs, fontsize=18)
+        ssa_name = path + 'run3_%d_SSA_%s.png' % (dose, obs)
         plt.savefig(ssa_name, bbox_inches='tight')
 
 
     #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
     # Create dataframe
+    all_times = [420, 600, 1440, 2160]  # Array of time points of interest to create a probability density function for, in minutes
+
     idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
     col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb', 'obsMLKLp', 'obstBID']
     df_dens_plot = pd.DataFrame(0, idx, col)
@@ -265,15 +273,14 @@ for tnf_title, dose in TNF_LOOP:
     for t_point in all_times:
         for obs in model.observables:
             array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
-            kde_array = array[np.nonzero(array)]
-            if len(kde_array) > 1:
-                plt.figure()
-                sns.distplot(kde_array, kde=True)
-                plt.xlabel("Molecules/Cell", fontsize=15)
-                plt.ylabel("Density", fontsize=15)
-                plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
-                pdf_name = path + 'run2_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
-                plt.savefig(pdf_name, bbox_inches='tight')
+            kde_array = array + 1e-12
+            plt.figure()
+            sns.distplot(kde_array, kde=True)
+            plt.xlabel("Molecules/Cell", fontsize=15)
+            plt.ylabel("Density", fontsize=15)
+            plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
+            pdf_name = path + 'run3_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+            plt.savefig(pdf_name, bbox_inches='tight')
 
 # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
 # for t_point in all_times:
