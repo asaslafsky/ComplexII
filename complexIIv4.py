@@ -243,7 +243,7 @@ for tnf_title, dose in TNF_LOOP:
         plt.xlabel("Time (in hr)", fontsize=15)
         plt.ylabel("Molecules/Cell", fontsize=15)
         plt.title('%s Trajectories' % obs.name, fontsize=18)
-        ssa_name = path + '%d_SSA_%s.png' % (dose, obs.name)
+        ssa_name = path + 'run2_%d_SSA_%s.png' % (dose, obs.name)
         plt.savefig(ssa_name, bbox_inches='tight')
 
 
@@ -264,16 +264,16 @@ for tnf_title, dose in TNF_LOOP:
     # Plot dataframe
     for t_point in all_times:
         for obs in model.observables:
-            plt.figure()
             array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
             kde_array = array[np.nonzero(array)]
             if len(kde_array) > 1:
+                plt.figure()
                 sns.distplot(kde_array, kde=True)
-            plt.xlabel("Molecules/Cell", fontsize=15)
-            plt.ylabel("Density", fontsize=15)
-            plt.title('%s Kernel Density Estimation at %d Hours' % (obs.name, t_point / 60), fontsize=18)
-            pdf_name = path + '%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
-            plt.savefig(pdf_name, bbox_inches='tight')
+                plt.xlabel("Molecules/Cell", fontsize=15)
+                plt.ylabel("Density", fontsize=15)
+                plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
+                pdf_name = path + 'run2_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+                plt.savefig(pdf_name, bbox_inches='tight')
 
 # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
 # for t_point in all_times:
