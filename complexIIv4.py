@@ -249,7 +249,7 @@ for tnf_title, dose in TNF_LOOP:
         plt.xlabel("Time (in hr)", fontsize=15)
         plt.ylabel("Molecules/Cell", fontsize=15)
         plt.title('%s Trajectories' % obs, fontsize=18)
-        ssa_name = path + 'run3_%d_SSA_%s.png' % (dose, obs)
+        ssa_name = path + 'run4_%d_SSA_%s.png' % (dose, obs)
         plt.savefig(ssa_name, bbox_inches='tight')
 
 
@@ -274,42 +274,18 @@ for tnf_title, dose in TNF_LOOP:
         for obs in model.observables:
             array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
             kde_array = array + 1e-12
-            plt.figure()
-            sns.distplot(kde_array, kde=True)
+            # plt.figure()
+            fig, ax = plt.subplots()
+            sns.distplot(kde_array, kde=True, ax=ax)
+            sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
             plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
-            pdf_name = path + 'run3_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+            pdf_name = path + 'run4_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
             plt.savefig(pdf_name, bbox_inches='tight')
 
 # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
 # for t_point in all_times:
 #      for obs in model.observables:
-#           print("At %d hour(s) %s amount is %d molecules/cell" % (t_point/60, obs.name, ode_sim_res.observables[t_point][obs.name]))
-
-#--------------------------------------------------------------------------------------------------------------------------------------------------------------
-# plt.figure()
-# fig, axs = plt.subplots(nrows=5, ncols=1, sharex=True)
-# for plot_num, obs in enumerate(model.observables):
-#     # for obs, plot_num in obs_plot_num:
-#     axs[plot_num].plot(tspan / 60, df.loc[:, obs.name])
-#     plt.xlabel("Time (in hr)", fontsize=15)
-#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-#     plt.title(obs.name)
-# plt.suptitle('SSA Trajectories: %s' % tnf_title, size=20)
-# plt.tight_layout()
-# plt.show()
-   # #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA)
-   #  plt.figure()
-   #  fig, axs = plt.subplots(nrows=5, ncols=1, sharex=True)
-   #  for plot_num, obs in enumerate(model.observables):
-   #  # for obs, plot_num in obs_plot_num:
-   #      axs[plot_num].plot( for _, run in df.groupby('simulation'): (run.loc[:, obs.name])
-   #      plt.xlabel("Time (in hr)", fontsize=15)
-   #      plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-   #      plt.title(obs.name)
-   #  plt.suptitle('SSA Trajectories: %s' % tnf_title, size=20)
-   #  plt.tight_layout()
-   #  plt.show()
-   #  # ssa_name = path + '%d_SSA_%s.png' % (dose, obs)
-   #  # plt.savefig(ssa_name, bbox_inches='tight')
+#           print("At %d hour(s) %s amount is %d molecules/cell" % (t_point/60, obs.name,
+# ode_sim_res.observables[t_point][obs.name]))
