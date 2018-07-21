@@ -1,12 +1,13 @@
 # import the pysb module and all its methods and functions
-import pandas as pd
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 import numpy as np
+import pandas as pd
 import seaborn as sns
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
 from pysb import *
+# from matplotlib.ticker import MaxNLocator
 #import random
 
 # Definitions
@@ -267,25 +268,31 @@ for tnf_title, dose in TNF_LOOP:
             for obs in model.observables:
                 run_slice = run.loc[[(sim_num, t_point)], [obs.name]]
                 conc = run_slice.values[0]
-                df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = int(conc)
-
+                df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
+    #
     # Plot dataframe
     for t_point in all_times:
         for obs in model.observables:
             array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
             kde_array = array + 1e-12
-            # plt.figure()
-            fig, ax = plt.subplots()
-            sns.distplot(kde_array, kde=True, ax=ax)
-            sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
+            plt.figure()
+            sns.distplot(kde_array, kde=True)
+            # fig, ax = plt.subplots()
+            # sns.distplot(kde_array, kde=True)
+            # sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
+            # ymin, ymax = plt.gca().get_ylim()
+            # plt.bar([ode_sim_res.observables[t_point][obs.name]], height=ymax, width=.01,  color='black')
+            # plt.gca().axes.get_xaxis().set_visible(False)
+            # ax = plt.gca()
+            # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+            plt.ticklabel_format(useOffset=False)
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
             plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
-            pdf_name = path + 'run4_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+            pdf_name = path + 'run5_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
             plt.savefig(pdf_name, bbox_inches='tight')
 
-# #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
-# for t_point in all_times:
-#      for obs in model.observables:
-#           print("At %d hour(s) %s amount is %d molecules/cell" % (t_point/60, obs.name,
-# ode_sim_res.observables[t_point][obs.name]))
+    # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
+    # for t_point in all_times:
+    #      for obs in model.observables:
+    #           print("Dose:%d, Time: %d, Obs: %s = %d " % (dose, t_point/60, obs.name, ode_sim_res.observables[t_point][obs.name]))
