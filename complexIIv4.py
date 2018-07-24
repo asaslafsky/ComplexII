@@ -11,7 +11,7 @@ from pysb import *
 #import random
 
 # Definitions
-NUM_SSA_RUNS = 10 #How many times SSA will be ran
+NUM_SSA_RUNS = 10000 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -239,7 +239,7 @@ for tnf_title, dose in TNF_LOOP:
 
     #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
     # Array: [(Observable name, number to start y axis at, number to end y axis at)]
-    obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 1100)]
+    obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 11000)]
 
     for obs, y1, y2 in obs_y_range:
         plt.figure()
@@ -251,7 +251,7 @@ for tnf_title, dose in TNF_LOOP:
         plt.xlabel("Time (in hr)", fontsize=15)
         plt.ylabel("Molecules/Cell", fontsize=15)
         plt.title('%s Trajectories' % obs, fontsize=18)
-        ssa_name = path + 'run4_%d_SSA_%s.png' % (dose, obs)
+        ssa_name = path + 'run5_%d_SSA_%s.png' % (dose, obs)
         plt.savefig(ssa_name, bbox_inches='tight')
 
 
