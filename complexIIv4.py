@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 import numpy as np
-import pandas as pd
-import seaborn as sns
+# import pandas as pd
+# import seaborn as sns
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
 from pysb import *
