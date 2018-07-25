@@ -64,12 +64,15 @@ Parameter('kf_RIP1_TRADD_FADD_C8_bind_FLIP', 3.27e-06) #8.72e-05
 Parameter('kr_RIP1_TRADD_FADD_C8_bind_FLIP', 0.018) #1.08
 Parameter('kc_FLIP_activates_C8', 3.27e-02) #6
 Parameter('kc_RIP1_TRADD_FADD_C8_FLIP_disassociate', .1) #6.00
-Parameter('kf_C8a_binds_BID', 1e-6)
-Parameter('kr_C8a_binds_BID', 1e-3)
+Parameter('kf_C8a_binds_BID', 1e-3) #1e-6
+Parameter('kr_C8a_binds_BID', 1) #1e-3
 Parameter('kc_C8a_truncates_BID', 1)
-Parameter('kc_tBID_to_caspases', 1e-3)
-Parameter('kc_caspase_autoactivation', 1e-6)
+Parameter('kc_tBID_to_caspases', 1e-6)
+Parameter('kc_caspase_autoactivation', 1e-3)
+Parameter('kf_active_casp_binds_inactive_casp',1e-3)
+Parameter('kr_active_casp_binds_inactive_casp', 1)
 Parameter('kc_active_casp_activates_inactive_casp', .01)
+
 
 #TNF INTERACTIONS
 #Unbound TNF is degraded
@@ -189,7 +192,11 @@ Rule('tBID_to_caspase', BID(c8=None, mod='trunc') >> Caspases(casp=None, mod='i'
 Rule('caspase_autoactivation', Caspases(casp=None, mod='i') >> Caspases(casp=None, mod='a'), kc_caspase_autoactivation)
 
 #active caspase activates inactive caspase
-Rule('active_casp_activates_inactive_casp', Caspases(casp=None, mod='a') + Caspases(casp=None, mod='i') >> Caspases(casp=None, mod='a') + Caspases(casp=None, mod='a'),
+Rule('active_casp_binds_inactive_casp', Caspases(casp=None, mod='a') + Caspases(casp=None, mod='i') | Caspases(casp=11, mod='a') % Caspases(casp=11, mod='i'),
+     kf_active_casp_binds_inactive_casp, kr_active_casp_binds_inactive_casp)
+
+#active caspase activates inactive caspase
+Rule('active_casp_activates_inactive_casp', Caspases(casp=11, mod='a') % Caspases(casp=11, mod='i') >> Caspases(casp=None, mod='a') + Caspases(casp=None, mod='a'),
      kc_active_casp_activates_inactive_casp)
 
 
@@ -204,7 +211,7 @@ Parameter('RIP3_0', 40000)#40000  #20000
 Parameter('MLKL_0', 10000)
 Parameter('C8_0', 9000)#random.randint(90, 90000)      #0.004 #0.09
 Parameter('FLIP_0', 3900)#3900    #0.004 #0.09
-Parameter('BID_0', 10000)
+Parameter('BID_0', 20000) #from 10,000 changed to 20,000 based on amount might be expected for caspases
 Parameter('Caspases_0', 0) #6.6ng in 10^6 apoptotic jurkat cells
 Initial(TNF(tnfr=None), TNF_0)
 Initial(TNFR(tnf=None, traddrip1=None), TNFR_0)
