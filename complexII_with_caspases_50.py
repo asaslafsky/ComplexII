@@ -11,7 +11,7 @@ from pysb import *
 #import random
 
 # Definitions
-NUM_SSA_RUNS = 10000 #How many times SSA will be ran
+NUM_SSA_RUNS = 50000 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -64,13 +64,14 @@ Parameter('kf_RIP1_TRADD_FADD_C8_bind_FLIP', 3.27e-06) #8.72e-05
 Parameter('kr_RIP1_TRADD_FADD_C8_bind_FLIP', 0.018) #1.08
 Parameter('kc_FLIP_activates_C8', 3.27e-02) #6
 Parameter('kc_RIP1_TRADD_FADD_C8_FLIP_disassociate', .1) #6.00
-Parameter('kf_C8a_binds_BID', 1e-6)
-Parameter('kr_C8a_binds_BID', 1e-3)
+Parameter('kf_C8a_binds_BID', 1e-3) #1e-6
+Parameter('kr_C8a_binds_BID', 1) #1e-3
 Parameter('kc_C8a_truncates_BID', 1)
-Parameter('kc_tBID_activates_caspase', 1e-3)
+Parameter('kc_tBID_to_caspases', 1e-6)
+Parameter('kc_caspase_autoactivation', 1e-3)
 Parameter('kf_active_casp_binds_inactive_casp', 1e-3)
 Parameter('kr_active_casp_binds_inactive_casp', 1)
-Parameter('kc_active_casp_activates_inactive_casp', .01)
+Parameter('kc_active_casp_activates_inactive_casp', 1)
 
 
 #TNF INTERACTIONS
@@ -184,11 +185,13 @@ Rule('C8a_binds_BID', C8(fadd=None, flip=None, bid=None, mod='a') + BID(c8=None,
 Rule('C8a_truncates_BID', C8(fadd=None, flip=None, bid=10, mod='a') % BID(c8=10, mod='unmod') >> C8(fadd=None, flip=None, bid=None, mod='a') + BID(c8=None, mod='trunc'),
      kc_C8a_truncates_BID)
 
-#tBID activates a caspase
-Rule('tBID_activates_caspase', BID(c8=None, mod='trunc') + Caspases(casp=None, mod='i') >> BID(c8=None, mod='trunc') + Caspases(casp=None, mod='a'),
-     kc_tBID_activates_caspase)
+#tBID turns into a caspase
+Rule('tBID_to_caspase', BID(c8=None, mod='trunc') >> Caspases(casp=None, mod='i'), kc_tBID_to_caspases)
 
-#active caspase binds inactive caspase
+#inactive caspase turns on
+Rule('caspase_autoactivation', Caspases(casp=None, mod='i') >> Caspases(casp=None, mod='a'), kc_caspase_autoactivation)
+
+#active caspase activates inactive caspase
 Rule('active_casp_binds_inactive_casp', Caspases(casp=None, mod='a') + Caspases(casp=None, mod='i') | Caspases(casp=11, mod='a') % Caspases(casp=11, mod='i'),
      kf_active_casp_binds_inactive_casp, kr_active_casp_binds_inactive_casp)
 
@@ -208,8 +211,8 @@ Parameter('RIP3_0', 40000)#40000  #20000
 Parameter('MLKL_0', 10000)
 Parameter('C8_0', 9000)#random.randint(90, 90000)      #0.004 #0.09
 Parameter('FLIP_0', 3900)#3900    #0.004 #0.09
-Parameter('BID_0', 10000)
-Parameter('Caspases_0', 10000) #6.6ng in 10^6 apoptotic jurkat cells
+Parameter('BID_0', 10000) #from 10,000 changed to 20,000 based on amount might be expected for caspases
+Parameter('Caspases_0', 0) #6.6ng in 10^6 apoptotic jurkat cells
 Initial(TNF(tnfr=None), TNF_0)
 Initial(TNFR(tnf=None, traddrip1=None), TNFR_0)
 Initial(TRADD(tnfr=None, rip1=None), TRADD_0)
@@ -273,7 +276,7 @@ for tnf_title, dose in TNF_LOOP:
         plt.xlabel("Time (in hr)", fontsize=15)
         plt.ylabel("Molecules/Cell", fontsize=15)
         plt.title('%s Trajectories' % obs, fontsize=18)
-        ssa_name = path + '10Casp_%d_SSA_%s.png' % (dose, obs)
+        ssa_name = path + '50Casp_%d_SSA_%s.png' % (dose, obs)
         plt.savefig(ssa_name, bbox_inches='tight')
 
 
@@ -312,7 +315,7 @@ for tnf_title, dose in TNF_LOOP:
             plt.xlabel("Molecules/Cell", fontsize=15)
             plt.ylabel("Density", fontsize=15)
             plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
-            pdf_name = path + '10Casp_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+            pdf_name = path + '50Casp_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
             plt.savefig(pdf_name, bbox_inches='tight')
 
     # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
