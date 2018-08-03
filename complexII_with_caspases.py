@@ -67,7 +67,7 @@ Parameter('kc_RIP1_TRADD_FADD_C8_FLIP_disassociate', .1) #6.00
 Parameter('kf_C8a_binds_BID', 1e-6)
 Parameter('kr_C8a_binds_BID', 1e-3)
 Parameter('kc_C8a_truncates_BID', 1)
-Parameter('kc_tBID_activates_caspase', 1e-3)
+Parameter('kc_tBID_activates_caspase', 1e-3) #https://www.ncbi.nlm.nih.gov/pmc/articles/PMC1367306/
 Parameter('kf_active_casp_binds_inactive_casp', 1e-3)
 Parameter('kr_active_casp_binds_inactive_casp', 1)
 Parameter('kc_active_casp_activates_inactive_casp', .01)
@@ -209,7 +209,7 @@ Parameter('MLKL_0', 10000)
 Parameter('C8_0', 9000)#random.randint(90, 90000)      #0.004 #0.09
 Parameter('FLIP_0', 3900)#3900    #0.004 #0.09
 Parameter('BID_0', 10000)
-Parameter('Caspases_0', 10000) #6.6ng in 10^6 apoptotic jurkat cells
+Parameter('Caspases_0', 10000)
 Initial(TNF(tnfr=None), TNF_0)
 Initial(TNFR(tnf=None, traddrip1=None), TNFR_0)
 Initial(TRADD(tnfr=None, rip1=None), TRADD_0)
