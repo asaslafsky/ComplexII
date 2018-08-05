@@ -11,7 +11,7 @@ import seaborn as sns
 from scipy import stats
 from pysb.simulator import StochKitSimulator
 
-#plt.switch_backend('agg')
+plt.switch_backend('agg')
 
 # instantiate a model
 Model()
