@@ -332,7 +332,7 @@ ssa_sim_res = ssa_sim.run(initials={TNF(tnfr=None): dose}, n_runs=NUM_SSA_RUNS)
 df = ssa_sim_res.dataframe
 
 #FOR EACH OBSERVABLE AVERAGE THE SSA RUNS AT EACH TIME POINT
-avg = df.groupby(level='time').mean()
+ssa_avg = df.groupby(level='time').mean()
 
 for key in keys:
     print(key)
@@ -399,7 +399,7 @@ for key in keys:
         for obs in model.observables:
             # Crappy quick fix, but observables must be in same order in model as in data files
             if key == keys[int(obs.name.replace('O_',''))]:
-                ax.plot(tspan / 60, avg.loc[:, obs.name]/ariella_norms[key], color='mediumpurple', label='SSA Avg',linewidth=1.5)
+                ax.plot(tspan / 60, ssa_avg.loc[:, obs.name]/ariella_norms[key], color='mediumpurple', label='SSA Avg',linewidth=1.5)
                 ax.plot(tspan/60, ode_sim_res.observables[obs.name]/ariella_norms[key], color = 'black',linestyle=':',label='ODE',linewidth=3)
                 break
 
