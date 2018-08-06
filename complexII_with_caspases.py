@@ -250,31 +250,32 @@ for tnf_title, dose in TNF_LOOP:
     #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
     ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
     ssa_sim_res = ssa_sim.run(initials={TNF(tnfr=None): dose}, n_runs=NUM_SSA_RUNS)
+    ssa_sim_res.save('Caspases_SSA_data_%dTNF' % dose)
     df = ssa_sim_res.dataframe
 
-    #FOR EACH OBSERVABLE AVERAGE THE SSA RUNS AT EACH TIME POINT
-    avg = df.groupby(level='time').mean()
-
+    # #FOR EACH OBSERVABLE AVERAGE THE SSA RUNS AT EACH TIME POINT
+    # avg = df.groupby(level='time').mean()
+    #
     #RUN ODE SIMULATION
     ode_sim = ScipyOdeSimulator(model, tspan=tspan)
     ode_sim_res = ode_sim.run(initials={TNF(tnfr=None): dose})
-
-    #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
-    # Array: [(Observable name, number to start y axis at, number to end y axis at)]
-    obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 11000), ('obsCaspases', 0, 11000)]
-
-    for obs, y1, y2 in obs_y_range:
-        plt.figure()
-        plt.ylim(y1, y2)
-        for _, run in df.groupby('simulation'):
-                plt.plot(tspan / 60, run.loc[:, obs])
-        plt.plot(tspan / 60, avg.loc[:, obs], 'gold', linewidth=3)
-        plt.plot(tspan / 60, ode_sim_res.observables[obs], 'black', linewidth=3, linestyle='dashed')
-        plt.xlabel("Time (in hr)", fontsize=15)
-        plt.ylabel("Molecules/Cell", fontsize=15)
-        plt.title('%s Trajectories' % obs, fontsize=18)
-        ssa_name = path + '10Casp_%d_SSA_%s.png' % (dose, obs)
-        plt.savefig(ssa_name, bbox_inches='tight')
+    #
+    # #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
+    # # Array: [(Observable name, number to start y axis at, number to end y axis at)]
+    # obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 11000), ('obsCaspases', 0, 11000)]
+    #
+    # for obs, y1, y2 in obs_y_range:
+    #     plt.figure()
+    #     plt.ylim(y1, y2)
+    #     for _, run in df.groupby('simulation'):
+    #             plt.plot(tspan / 60, run.loc[:, obs])
+    #     plt.plot(tspan / 60, avg.loc[:, obs], 'gold', linewidth=3)
+    #     plt.plot(tspan / 60, ode_sim_res.observables[obs], 'black', linewidth=3, linestyle='dashed')
+    #     plt.xlabel("Time (in hr)", fontsize=15)
+    #     plt.ylabel("Molecules/Cell", fontsize=15)
+    #     plt.title('%s Trajectories' % obs, fontsize=18)
+    #     ssa_name = path + '10Casp_%d_SSA_%s.png' % (dose, obs)
+    #     plt.savefig(ssa_name, bbox_inches='tight')
 
 
     #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
@@ -293,29 +294,43 @@ for tnf_title, dose in TNF_LOOP:
                 conc = run_slice.values[0]
                 df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
 
-    # Plot dataframe
+    #KDE Averages
+    print('\n\nKDE avg: %d TNF' % dose)
     for t_point in all_times:
+        print('\nHours:' + str(t_point/60))
         for obs in model.observables:
+            #Determine average of KDE plot
             array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
-            kde_array = array + 1e-12
-            plt.figure()
-            sns.distplot(kde_array, kde=True)
-            # fig, ax = plt.subplots()
-            # sns.distplot(kde_array, kde=True)
-            # sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
-            # ymin, ymax = plt.gca().get_ylim()
-            # plt.bar([ode_sim_res.observables[t_point][obs.name]], height=ymax, width=.01,  color='black')
-            # plt.gca().axes.get_xaxis().set_visible(False)
-            # ax = plt.gca()
-            # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-            plt.ticklabel_format(useOffset=False)
-            plt.xlabel("Molecules/Cell", fontsize=15)
-            plt.ylabel("Density", fontsize=15)
-            plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
-            pdf_name = path + '10Casp_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
-            plt.savefig(pdf_name, bbox_inches='tight')
+            # kde_array = array + 1e-12
+            mean = array.mean()
+            print('%s: %d' % (obs.name, mean))
 
-    # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
+
+    # # Plot dataframe
     # for t_point in all_times:
-    #      for obs in model.observables:
-    #           print("Dose:%d, Time: %d, Obs: %s = %d " % (dose, t_point/60, obs.name, ode_sim_res.observables[t_point][obs.name]))
+    #     for obs in model.observables:
+    #         array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
+    #         kde_array = array + 1e-12
+    #         plt.figure()
+    #         sns.distplot(kde_array, kde=True)
+    #         # fig, ax = plt.subplots()
+    #         # sns.distplot(kde_array, kde=True)
+    #         # sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
+    #         # ymin, ymax = plt.gca().get_ylim()
+    #         # plt.bar([ode_sim_res.observables[t_point][obs.name]], height=ymax, width=.01,  color='black')
+    #         # plt.gca().axes.get_xaxis().set_visible(False)
+    #         # ax = plt.gca()
+    #         # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+    #         plt.ticklabel_format(useOffset=False)
+    #         plt.xlabel("Molecules/Cell", fontsize=15)
+    #         plt.ylabel("Density", fontsize=15)
+    #         plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
+    #         pdf_name = path + '10Casp_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+    #         plt.savefig(pdf_name, bbox_inches='tight')
+
+    #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
+    print('\n\nODE output: %d TNF' % dose)
+    for t_point in all_times:
+        print('\nHours:' + str(t_point / 60))
+        for obs in model.observables:
+            print('%s: %d' % (obs.name, ode_sim_res.observables[t_point][obs.name]))

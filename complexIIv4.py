@@ -11,7 +11,7 @@ from pysb import *
 #import random
 
 # Definitions
-NUM_SSA_RUNS = 10 #How many times SSA will be ran
+NUM_SSA_RUNS = 10000 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -256,43 +256,49 @@ for tnf_title, dose in TNF_LOOP:
     #     plt.savefig(ssa_name, bbox_inches='tight')
 
 
-    #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
+    # AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
     # Create dataframe
-    # all_times = [420, 600, 1440, 2160]  # Array of time points of interest to create a probability density function for, in minutes
-    #
-    # idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
-    # col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb', 'obsMLKLp', 'obstBID']
-    # df_dens_plot = pd.DataFrame(0, idx, col)
-    #
-    # # Fill in dataframe to plot
-    # for sim_num, run in df.groupby('simulation'):
-    #     for t_point in all_times:
-    #         for obs in model.observables:
-    #             run_slice = run.loc[[(sim_num, t_point)], [obs.name]]
-    #             conc = run_slice.values[0]
-    #             df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
+    all_times = [420, 600, 1440, 2160]  # Array of time points of interest to create a probability density function for, in minutes
 
-    # # Plot dataframe
-    # for t_point in all_times:
-    #     for obs in model.observables:
-    #         array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
-    #         kde_array = array + 1e-12
-    #         plt.figure()
-    #         sns.distplot(kde_array, kde=True)
-    #         # fig, ax = plt.subplots()
-    #         # sns.distplot(kde_array, kde=True)
-    #         # sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
-    #         # ymin, ymax = plt.gca().get_ylim()
-    #         # plt.bar([ode_sim_res.observables[t_point][obs.name]], height=ymax, width=.01,  color='black')
-    #         # plt.gca().axes.get_xaxis().set_visible(False)
-    #         # ax = plt.gca()
-    #         # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
-    #         plt.ticklabel_format(useOffset=False)
-    #         plt.xlabel("Molecules/Cell", fontsize=15)
-    #         plt.ylabel("Density", fontsize=15)
-    #         plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
-    #         pdf_name = path + 'run5_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
-    #         plt.savefig(pdf_name, bbox_inches='tight')
+    idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
+    col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb', 'obsMLKLp', 'obstBID']
+    df_dens_plot = pd.DataFrame(0, idx, col)
+
+    # Fill in dataframe to plot
+    for sim_num, run in df.groupby('simulation'):
+        for t_point in all_times:
+            for obs in model.observables:
+                run_slice = run.loc[[(sim_num, t_point)], [obs.name]]
+                conc = run_slice.values[0]
+                df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
+
+    # Plot dataframe
+    print('\n\nKDE avg: %d TNF' % dose)
+    for t_point in all_times:
+        print('\nHours:' + str(t_point/60))
+        for obs in model.observables:
+            #Determine average of KDE plot
+            array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
+            # kde_array = array + 1e-12
+            mean = array.mean()
+            print('%s: %d' % (obs.name, mean))
+            ##Plot KDE
+            # plt.figure()
+            # sns.distplot(kde_array, kde=True)
+            # # fig, ax = plt.subplots()
+            # # sns.distplot(kde_array, kde=True)
+            # # sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
+            # # ymin, ymax = plt.gca().get_ylim()
+            # # plt.bar([ode_sim_res.observables[t_point][obs.name]], height=ymax, width=.01,  color='black')
+            # # plt.gca().axes.get_xaxis().set_visible(False)
+            # # ax = plt.gca()
+            # # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+            # plt.ticklabel_format(useOffset=False)
+            # plt.xlabel("Molecules/Cell", fontsize=15)
+            # plt.ylabel("Density", fontsize=15)
+            # plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
+            # pdf_name = path + 'run5_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+            # plt.savefig(pdf_name, bbox_inches='tight')
 
     ##Plot Percentage of observable at 0 molecules/cell
 
