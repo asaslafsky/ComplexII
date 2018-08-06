@@ -6,14 +6,11 @@ import sys
 import numpy as np
 from pysb.simulator import ScipyOdeSimulator
 from pysb import *
-import pandas as pd
-import seaborn as sns
-from scipy import stats
 from pysb.simulator import StochKitSimulator
 
-#plt.switch_backend('agg')
+plt.switch_backend('agg')
 
-# instantiate a model
+#from complexIIv4_normalization import model
 Model()
 
 #Monomers: Name, binding site (named according to what it binds to or if the site gets modified=mod), optional (the states the binding site can be in)
@@ -38,7 +35,7 @@ Parameter('kc_degrade_TNF', 1.00e-03) #1.00e-03
 Parameter('kf_TNF_TNFR_bind', 1e-6) #2.26e-06
 Parameter('kr_TNF_TNFR_bind', 1e-3) #6.00e-03 **
 Parameter('kf_TNF_TNFR_bind_TRADD', 1.00e-06) #1.00e-06
-Parameter('kr_TNF_TNFR_bind_TRADD', 0.001) #1.00e-03
+Parameter('kr_TNF_TNFR_bind_TRADD', 0.001) #6.02e-02) #1.00e-03
 Parameter('kf_TNF_TNFR_bind_RIP1', 1.00e-06) #1.00e-06
 Parameter('kr_TNF_TNFR_bind_RIP1', 1e-3) #1.44e-01
 Parameter('kf_TNF_TNFR_RIP1_bind_TRADD', 1.00e-06) #1.00e-06
@@ -179,7 +176,7 @@ Rule('C8a_truncates_BID', C8(fadd=None, flip=None, bid=10, mod='a') % BID(c8=10,
 
 
 #Initial Conditions
-Parameter('TNF_0', 2326)#2326     #698 is 30ng/ml of TNF
+Parameter('TNF_0', 9390)#2326     #698 is 30ng/ml of TNF
 Parameter('TNFR_0', 4800)#4800    #0.00246
 Parameter('TRADD_0', 9000)#9000
 Parameter('RIP1_0', 40000)#random.randint(400, 400000)  #47000 0.04
@@ -202,23 +199,48 @@ Initial(C8(fadd=None, flip=None, bid=None, mod='i'), C8_0)
 Initial(FLIP(c8=None, fadd=None), FLIP_0)
 Initial(BID(c8=None, mod='unmod'), BID_0)
 
-#Anna's Observables
-#ComplexI
+##Observables
+Observable('O_1', TNF(tnfr=None))
+Observable('O_2', TNFR(tnf=None,traddrip1=None))
+Observable('O_3', TRADD(tnfr=None, rip1=None))
+
+Observable('O_4',RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=None, mod='ub'))
+Observable('O_5',A20(rip1=None))
+Observable('O_6',FADD(rip1=None, c8=None, flip=None))
+Observable('O_7',FLIP(c8=None, fadd=None))
+Observable('O_8',C8(fadd=None, flip=None, bid=None, mod='i'))
+Observable('O_9',RIP3(rip1=None, mlkl=None, mod='unmod'))
+Observable('O_10',TNF(tnfr=1) % TNFR(tnf=1, traddrip1=None))
+Observable('O_11',TNF(tnfr=1) % TNFR(tnf=1, traddrip1=2) % TRADD(tnfr=2, rip1=None))
+Observable('O_12',TNF(tnfr=1) % TNFR(tnf=1, traddrip1=2) % RIP1(tnfr=2, tradd=None, a20=None, fadd=None, rip3c8=None, mod='ub'))
+Observable('O_13',TNF(tnfr=1) % TNFR(tnf=1, traddrip1=2) % RIP1(tnfr=2, tradd=3, a20=None, fadd=None, rip3c8=None, mod='ub') % TRADD(tnfr=None, rip1=3))
 Observable('O_14',TNF(tnfr=1) % TNFR(tnf=1, traddrip1=2) % RIP1(tnfr=2, tradd=3, a20=4, fadd=None, rip3c8=None, mod='ub') % TRADD(tnfr=None, rip1=3) % A20(rip1=4))
-#ComplexIIb
+Observable('O_15',TRADD(tnfr=None, rip1=3) % RIP1(tnfr=None, tradd=3, a20=None, fadd=None, rip3c8=None, mod='db'))
+Observable('O_16',TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, a20=None, fadd=5, rip3c8=None, mod='db') % FADD(rip1=5, c8=None, flip=None))
+Observable('O_17',TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, a20=None, fadd=5, rip3c8=None, mod='db') % FADD(rip1=5, c8=6, flip=None) % C8(fadd=6, flip=None, bid=None, mod='i'))
+
 Observable('O_18',TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, a20=None, fadd=5, rip3c8=6, mod='db') % FADD(rip1=5, c8=None, flip=None) % RIP3(rip1=6, mlkl=None, mod='unmod'))
-#ComplexIIa
 Observable('O_19',TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, a20=None, fadd=5, rip3c8=None, mod='db') % FADD(rip1=5, c8=6, flip=9) % C8(fadd=6, flip=7, bid=None, mod='i') % FLIP(c8=7, fadd=9))
-#C8 activated
+
+Observable('O_20',TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, a20=None, fadd=5, rip3c8=None, mod='db') % FADD(rip1=5, c8=6, flip=9) % C8(fadd=6, flip=7, bid=None, mod='a') % FLIP(c8=7, fadd=9))
+
 Observable('O_21',C8(fadd=None, flip=None, bid=None, mod='a'))
-#MLKL phosphorylated
+
+Observable('O_22',RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='db') % RIP3(rip1=6, mlkl=None, mod='unmod'))
+Observable('O_23',RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='db') % RIP3(rip1=6, mlkl=None, mod='p'))
+Observable('O_24',RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='p') % RIP3(rip1=6, mlkl=None, mod='p'))
+Observable('O_25',RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='p') % RIP3(rip1=6, mlkl=8, mod='p') % MLKL(rip3=8, mod='i'))
+Observable('O_26',MLKL(rip3=None, mod='i'))
+
 Observable('O_27',MLKL(rip3=None, mod='p'))
-#tBID
+#Observable('O_28',BID(c8=None, mod='unmod'))
 Observable('O_29',BID(c8=None, mod='trunc'))
+#Observable('O_30',C8(fadd=None, flip=None, bid=10, mod='a') % BID(c8=10, mod='unmod'))
+
 
 
 #from complexIIv4_normalization import model
-NUM_SSA_RUNS = 10
+NUM_SSA_RUNS = 10000
 
 datafiles = []
 if sys.argv[1] == 'file':
@@ -328,11 +350,11 @@ yout = ode_sim_res.all
 #SSA Simulation
 ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
 ssa_sim_res = ssa_sim.run(n_runs=NUM_SSA_RUNS)
-ssa_sim_res = ssa_sim.run(initials={TNF(tnfr=None): dose}, n_runs=NUM_SSA_RUNS)
+#ssa_sim_res = ssa_sim.run(initials={TNF(tnfr=None): dose}, n_runs=NUM_SSA_RUNS)
 df = ssa_sim_res.dataframe
 
 #FOR EACH OBSERVABLE AVERAGE THE SSA RUNS AT EACH TIME POINT
-avg = df.groupby(level='time').mean()
+ssa_avg = df.groupby(level='time').mean()
 
 for key in keys:
     print(key)
@@ -349,7 +371,7 @@ for key in keys:
         '''
         if key in avgs:
             #grpnames = ['~100 ng/mL TNF','~10 ng/mL TNF','~0.1 ng/mL TNF']
-            grpnames = ['Membrane','No membrane']
+            grpnames = ['Smol, Membrane','Smol, No membrane']
             cols = ['tomato','cornflowerblue']
             #cols = ['navy', 'indigo', 'darkorange']
             grps = [60,10]
@@ -363,7 +385,7 @@ for key in keys:
                     for j in range(grps[n]):
                         tot += datalist[j+index][key][i]
                         count += 1
-                    avg = tot / count
+                    avg = float(tot) / count
                     avg_list.append(avg)
                 loops = 0
                 for i in range(len(avg_list)):
@@ -378,15 +400,17 @@ for key in keys:
                     loops += 1
 
                 # NORMALIZE AVG_LIST HERE
+                print(avg_list)
                 for i in range(len(avg_list)):
                     avg_list[i] = normalize(avg_list[i],key)
+                print(avg_list)
 
-                erlow=[]
-                for i in range(len(ster)):
-                    erlow.append(avg_list[i]-ster[i])
-                erhigh=[]
-                for i in range(len(ster)):
-                    erhigh.append(avg_list[i]+ster[i])
+                # erlow=[]
+                # for i in range(len(ster)):
+                #     erlow.append(avg_list[i]-ster[i])
+                # erhigh=[]
+                # for i in range(len(ster)):
+                #     erhigh.append(avg_list[i]+ster[i])
                         #ax.fill_between(datalist[0]['time'][i], avg_list[i]-ster, avg_list[i]+ster,alpha=0.2, edgecolor='#1B2ACC', facecolor='#089FFF') #, antialiased=True)
                         #ax.errorbar(datalist[0]['time'][i], avg_list[i], yerr=((tot / grps[n])**0.5) / grps[n]**0.5,color='red',capsize=5)
 
@@ -399,12 +423,12 @@ for key in keys:
         for obs in model.observables:
             # Crappy quick fix, but observables must be in same order in model as in data files
             if key == keys[int(obs.name.replace('O_',''))]:
-                ax.plot(tspan / 60, avg.loc[:, obs.name]/ariella_norms[key], color='mediumpurple', label='SSA Avg',linewidth=1.5)
+                ax.plot(tspan/60, ssa_avg.loc[:, obs.name]/ariella_norms[key], color='gold', label='SSA Avg',linewidth=1.5)
                 ax.plot(tspan/60, ode_sim_res.observables[obs.name]/ariella_norms[key], color = 'black',linestyle=':',label='ODE',linewidth=3)
                 break
 
         ax.set_xlabel('Time (hrs)')
-        ax.set_ylabel('Proportion of total possible')
+        ax.set_ylabel('Proportion of Total Possible Species')
         ax.xaxis.label.set_fontsize(16)
         ax.yaxis.label.set_fontsize(16)
         if key in plotnames.keys():
