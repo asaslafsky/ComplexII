@@ -1,19 +1,17 @@
-# pysb.pathfinder.set_path(ariella/anaconda3/envs/pysb/lib/stochkit)
-
 # import the pysb module and all its methods and functions
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
+plt.switch_backend('agg')
 import numpy as np
+import pandas as pd
+import seaborn as sns
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
-import pandas as pd
 from pysb import *
+# from matplotlib.ticker import MaxNLocator
 #import random
 
 # Definitions
-RUN_TYPE = 'Test 1000 runs' #Gives Titles to Saved Graphs: name according to what is changed i.e. protein fluctuations
-NUM_SSA_RUNS = 1000 #How many times SSA will be ran
+NUM_SSA_RUNS = 10 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -28,7 +26,8 @@ Monomer('A20', ['rip1'])
 Monomer('FADD', ['rip1', 'c8', 'flip'])
 #unmod=unmodified p=phosphorylated
 Monomer('RIP3', ['rip1', 'mlkl', 'mod'], {'mod': ['unmod', 'p']})
-Monomer('MLKL', ['rip3', 'mod'], {'mod': ['i', 'a']})
+#i=inactive, p=phosphorylated
+Monomer('MLKL', ['rip3', 'mod'], {'mod': ['i', 'p']})
 #i=inactive, a=active
 Monomer('C8', ['fadd', 'flip', 'bid', 'mod'], {'mod': ['i', 'a']})
 Monomer('FLIP', ['c8', 'fadd'])
@@ -47,8 +46,8 @@ Parameter('kr_TNF_TNFR_RIP1_bind_TRADD', 1e-3) #2.23e-03
 Parameter('kf_TNF_TNFR_RIP1_TRADD_bind_A20', 1.00e-06) #1.00e-06
 Parameter('kr_TNF_TNFR_RIP1_TRADD_bind_A20', 1.00e-03) #1.00e-03
 Parameter('kc_TNF_TNFR_RIP1_TRADD_A20_disassociate', .1) #2.23e-03
-Parameter('kf_RIP1_TRADD_bind_FADD', 1.25e-5) #
-Parameter('kr_RIP1_TRADD_bind_FADD', 10) #
+Parameter('kf_RIP1_TRADD_bind_FADD', .1) #
+Parameter('kr_RIP1_TRADD_bind_FADD', 3.11e-7) #
 Parameter('kf_RIP1_TRADD_FADD_bind_RIP3', 3.27e-06) #8.72e-05 #same binding rate as C8
 Parameter('kr_RIP1_TRADD_FADD_bind_RIP3', 0.018) #1.08 #same binding rates as C8
 Parameter('kc_RIP1_TRADD_FADD_RIP3_disassociate', .1) #6.00
@@ -139,9 +138,9 @@ Rule('RIP1_RIP3_bind_MLKL', RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip
      | RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='p') % RIP3(rip1=6, mlkl=8, mod='p') % MLKL(rip3=8, mod='i'),
      kf_RIP1_RIP3_bind_MLKL, kr_RIP1_RIP3_bind_MLKL)
 
-#RIP1p/RIP3p nonreversibly unbinds MLKL and activates MLKL
+#RIP1p/RIP3p nonreversibly unbinds MLKL and activates/phosphorylates MLKL
 Rule('RIP1_RIP3_activate_MLKL', RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='p') % RIP3(rip1=6, mlkl=8, mod='p') % MLKL(rip3=8, mod='i')
-     >> RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='p') % RIP3(rip1=6, mlkl=None, mod='p') + MLKL(rip3=None, mod='a'),
+     >> RIP1(tnfr=None, tradd=None, a20=None, fadd=None, rip3c8=6, mod='p') % RIP3(rip1=6, mlkl=None, mod='p') + MLKL(rip3=None, mod='p'),
      kc_RIP1_RIP3_activate_MLKL)
 
 
@@ -207,80 +206,97 @@ Initial(BID(c8=None, mod='unmod'), BID_0)
 Observable('obsComplexI', TNF(tnfr=1) % TNFR(tnf=1, traddrip1=2) % RIP1(tnfr=2, tradd=3, a20=4, fadd=None, rip3c8=None, mod='ub') % TRADD(tnfr=None, rip1=3) % A20(rip1=4))
 Observable('obsComplexIIa', TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, a20=None, fadd=5, rip3c8=None, mod='db') % FADD(rip1=5, c8=6, flip=None) % C8(fadd=6, flip=None, bid=None, mod='i'))
 Observable('obsComplexIIb', TRADD(tnfr=None, rip1=4) % RIP1(tnfr=None, tradd=4, a20=None, fadd=5, rip3c8=6, mod='db') % FADD(rip1=5, c8=None, flip=None) % RIP3(rip1=6, mlkl=None, mod='unmod'))
-Observable('obsMLKLa', MLKL(rip3=None, mod='a'))
+Observable('obsMLKLp', MLKL(rip3=None, mod='p'))
 Observable('obstBID', BID(c8=None, mod='trunc'))
 
-#LENGTH OF SIMULATION
-tspan = np.linspace(0, 2160, 2161) #Length of sim (start, stop, number of samples to generate). 4320 min, 72 hours.
+#Length of simulation
+tspan = np.linspace(0, 2160, 2161)
+
+#turn off graphs showing up
 plt.ioff()
 
-# #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
-# ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
-# ssa_sim_res = ssa_sim.run(n_runs=NUM_SSA_RUNS)
-# df = ssa_sim_res.dataframe
-#
-# for obs in model.observables:
-#     plt.figure()
-#     for _, run in df.groupby('simulation'):  #groupby returns tuple: index and run
-#             plt.plot(tspan / 60, run.loc[:, obs.name])
-#     plt.xlabel("Time (in hr)", fontsize=15)
-#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-#     plt.title('%s Trajectories' % obs.name)
-#     plt.savefig('%s: SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
-#
-# #RUN ODE SIMULATION
-ode_sim = ScipyOdeSimulator(model, tspan=tspan)
-ode_sim_res = ode_sim.run()
-# for obs in model.observables:
-#     plt.figure()
-#     plt.plot(tspan / 60, ode_sim_res.observables[obs.name], label='100 ng/ml TNF')
-#     plt.xlabel("Time (in hr)", fontsize=15)
-#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-#     plt.title('%s Trajectories' % obs.name)
-#     plt.legend(loc='best')
-#     plt.savefig('%s: ODE %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
-#
-# # FOR EACH OBSERVABLE: AVERAGE THE SSA RUNS AT EACH TIME POINT AND PLOT
-# avg = df.groupby(level='time').mean()
-#
-# for obs in model.observables:
-#     plt.figure()
-#     plt.plot(tspan / 60, avg.loc[:, obs.name])
-#     plt.xlabel("Time (in hr)", fontsize=15)
-#     plt.ylabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-#     plt.title('Average SSA %s Trajectories' % obs.name)
-#     plt.legend(loc='best')
-#     plt.savefig('%s: Average SSA %s' % (RUN_TYPE, obs.name), bbox_inches='tight')
+#Set Path to save figures
+path = '/home/asasla/main/ComplexII/'
+# path = '/Users/ariella/PycharmProjects/ComplexII/'
+
+#RUN THROUGH EACH AMOUNT OF TNF: HOW DOES THAT AFFECT SSA VS ODE
+TNF_LOOP = [('100 ng/ml TNF', 9390), ('10 ng/ml TNF', 939), ('1 ng/ml TNF', 94), ('.1 ng/ml TNF', 9)]
 
 
-# #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
-# all_times = [720, 1440, 2160] #Array of time points of interest: 24, 48, 72
-#
-# #Create dataframe
-# idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
-# col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb', 'obsMLKLa', 'obstBID']
-# df_dens_plot = pd.DataFrame(np.nan, idx, col)
-#
-# #Fill in dataframe to plot
-# for sim_num, run in df.groupby('simulation'):
-#      for t_point in all_times:
-#         for obs in model.observables:
-#              run_slice = run.loc[[(sim_num, t_point)], [obs.name]]
-#              conc = run_slice.values[0]
-#              df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
-#
-# #Plot dataframe
-# for t_point in all_times:
-#      for obs in model.observables:
-#           plt.figure()
-#           plt.hist(df_dens_plot.loc[[t_point], [obs.name]], density=True, histtype='stepfilled')
-#           plt.xlabel("%s [Molecules/Cell]" % obs.name, fontsize=15)
-#           plt.ylabel("Density", fontsize=15)
-#           plt.title('Probability Density Function for %s at %d Hour(s)' % (obs.name, t_point/60))
-#           plt.savefig('%s: Probability Density Function at %d Hour(s) for %s' % (RUN_TYPE, t_point, obs.name), bbox_inches='tight')
+for tnf_title, dose in TNF_LOOP:
+
+    #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
+    ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
+    ssa_sim_res = ssa_sim.run(initials={TNF(tnfr=None): dose}, n_runs=NUM_SSA_RUNS)
+    ssa_sim_res.save('SSA_data_%dTNF' % dose)
+    df = ssa_sim_res.dataframe
+
+    #FOR EACH OBSERVABLE AVERAGE THE SSA RUNS AT EACH TIME POINT
+    avg = df.groupby(level='time').mean()
+
+    #RUN ODE SIMULATION
+    ode_sim = ScipyOdeSimulator(model, tspan=tspan)
+    ode_sim_res = ode_sim.run(initials={TNF(tnfr=None): dose})
+
+    #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
+    # Array: [(Observable name, number to start y axis at, number to end y axis at)]
+    obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 11000)]
+
+    for obs, y1, y2 in obs_y_range:
+        plt.figure()
+        plt.ylim(y1, y2)
+        for _, run in df.groupby('simulation'):
+                plt.plot(tspan / 60, run.loc[:, obs])
+        plt.plot(tspan / 60, avg.loc[:, obs], 'gold', linewidth=3)
+        plt.plot(tspan / 60, ode_sim_res.observables[obs], 'black', linewidth=3, linestyle='dashed')
+        plt.xlabel("Time (in hr)", fontsize=15)
+        plt.ylabel("Molecules/Cell", fontsize=15)
+        plt.title('%s Trajectories' % obs, fontsize=18)
+        ssa_name = path + '%dTNF_SSA_%s.png' % (dose, obs)
+        plt.savefig(ssa_name, bbox_inches='tight')
 
 
-#DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
-for t_point in all_times:
-     for obs in model.observables:
-          print("At %d hour(s) %s amount is %d molecules/cell" % (t_point/60, obs.name, ode_sim_res.observables[obs.name][t_point]))
+    #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
+    # Create dataframe
+    all_times = [420, 600, 1440, 2160]  # Array of time points of interest to create a probability density function for, in minutes
+
+    idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
+    col = ['obsComplexI', 'obsComplexIIa', 'obsComplexIIb', 'obsMLKLp', 'obstBID']
+    df_dens_plot = pd.DataFrame(0, idx, col)
+
+    # Fill in dataframe to plot
+    for sim_num, run in df.groupby('simulation'):
+        for t_point in all_times:
+            for obs in model.observables:
+                run_slice = run.loc[[(sim_num, t_point)], [obs.name]]
+                conc = run_slice.values[0]
+                df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
+
+    #Plot dataframe
+    for t_point in all_times:
+        for obs in model.observables:
+            array = df_dens_plot.loc[[t_point], [obs.name]].values[:, 0]
+            kde_array = array + 1e-12
+            plt.figure()
+            sns.distplot(kde_array, kde=True)
+            # fig, ax = plt.subplots()
+            # sns.distplot(kde_array, kde=True)
+            # sns.distplot([ode_sim_res.observables[t_point][obs.name]]*5, color='black', ax=ax, hist_kws=dict(alpha=.7))
+            # ymin, ymax = plt.gca().get_ylim()
+            # plt.bar([ode_sim_res.observables[t_point][obs.name]], height=ymax, width=.01,  color='black')
+            # plt.gca().axes.get_xaxis().set_visible(False)
+            # ax = plt.gca()
+            # ax.xaxis.set_major_locator(MaxNLocator(integer=True))
+            plt.ticklabel_format(useOffset=False)
+            plt.xlabel("Molecules/Cell", fontsize=15)
+            plt.ylabel("Density", fontsize=15)
+            plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
+            pdf_name = path + '%dTNF_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
+            plt.savefig(pdf_name, bbox_inches='tight')
+
+    ##Plot Percentage of observable at 0 molecules/cell
+
+    # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
+    # for t_point in all_times:
+    #      for obs in model.observables:
+    #           print("Dose:%d, Time: %d, Obs: %s = %d " % (dose, t_point/60, obs.name, ode_sim_res.observables[t_point][obs.name]))

@@ -2,8 +2,8 @@
 import matplotlib.pyplot as plt
 plt.switch_backend('agg')
 import numpy as np
-# import pandas as pd
-# import seaborn as sns
+import pandas as pd
+import seaborn as sns
 from pysb.simulator import StochKitSimulator
 from pysb.simulator import ScipyOdeSimulator
 from pysb import *
@@ -11,7 +11,7 @@ from pysb import *
 #import random
 
 # Definitions
-NUM_SSA_RUNS = 10000 #How many times SSA will be ran
+NUM_SSA_RUNS = 10 #How many times SSA will be ran
 
 # instantiate a model
 Model()
@@ -228,35 +228,36 @@ for tnf_title, dose in TNF_LOOP:
     #RUN STOCHASTIC SIMULATION ALGORITHM (SSA)
     ssa_sim = StochKitSimulator(model, tspan=tspan, verbose=True)
     ssa_sim_res = ssa_sim.run(initials={TNF(tnfr=None): dose}, n_runs=NUM_SSA_RUNS)
+    ssa_sim_res.save('SSA_data_%dTNF' % dose)
     df = ssa_sim_res.dataframe
 
-    #FOR EACH OBSERVABLE AVERAGE THE SSA RUNS AT EACH TIME POINT
-    avg = df.groupby(level='time').mean()
+    # #FOR EACH OBSERVABLE AVERAGE THE SSA RUNS AT EACH TIME POINT
+    # avg = df.groupby(level='time').mean()
 
-    #RUN ODE SIMULATION
-    ode_sim = ScipyOdeSimulator(model, tspan=tspan)
-    ode_sim_res = ode_sim.run(initials={TNF(tnfr=None): dose})
+    # #RUN ODE SIMULATION
+    # ode_sim = ScipyOdeSimulator(model, tspan=tspan)
+    # ode_sim_res = ode_sim.run(initials={TNF(tnfr=None): dose})
 
-    #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
-    # Array: [(Observable name, number to start y axis at, number to end y axis at)]
-    obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 11000)]
+    # #PLOT STOCHASTIC SIMULATION ALGORITHM (SSA) WITH AVG SSA (YELLOW) AND ODE (BLACK)
+    # # Array: [(Observable name, number to start y axis at, number to end y axis at)]
+    # obs_y_range = [('obsComplexI', 0, 75), ('obsComplexIIa', 0, 75), ('obsComplexIIb', 0, 75), ('obsMLKLp', 0, 11000), ('obstBID', 0, 11000)]
+    #
+    # for obs, y1, y2 in obs_y_range:
+    #     plt.figure()
+    #     plt.ylim(y1, y2)
+    #     for _, run in df.groupby('simulation'):
+    #             plt.plot(tspan / 60, run.loc[:, obs])
+    #     plt.plot(tspan / 60, avg.loc[:, obs], 'gold', linewidth=3)
+    #     plt.plot(tspan / 60, ode_sim_res.observables[obs], 'black', linewidth=3, linestyle='dashed')
+    #     plt.xlabel("Time (in hr)", fontsize=15)
+    #     plt.ylabel("Molecules/Cell", fontsize=15)
+    #     plt.title('%s Trajectories' % obs, fontsize=18)
+    #     ssa_name = path + 'run5_%d_SSA_%s.png' % (dose, obs)
+    #     plt.savefig(ssa_name, bbox_inches='tight')
 
-    for obs, y1, y2 in obs_y_range:
-        plt.figure()
-        plt.ylim(y1, y2)
-        for _, run in df.groupby('simulation'):
-                plt.plot(tspan / 60, run.loc[:, obs])
-        plt.plot(tspan / 60, avg.loc[:, obs], 'gold', linewidth=3)
-        plt.plot(tspan / 60, ode_sim_res.observables[obs], 'black', linewidth=3, linestyle='dashed')
-        plt.xlabel("Time (in hr)", fontsize=15)
-        plt.ylabel("Molecules/Cell", fontsize=15)
-        plt.title('%s Trajectories' % obs, fontsize=18)
-        ssa_name = path + 'run5_%d_SSA_%s.png' % (dose, obs)
-        plt.savefig(ssa_name, bbox_inches='tight')
 
-
-    # #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
-    # # Create dataframe
+    #AT HIGH VARIABILITY AND END TIMEPOINTS FOR EACH OBSERVABLE: PLOT ALL SSA RUNS OF THAT TIME POINT WITH A DENSITY PLOT
+    # Create dataframe
     # all_times = [420, 600, 1440, 2160]  # Array of time points of interest to create a probability density function for, in minutes
     #
     # idx = pd.MultiIndex.from_product([all_times, (range(0, NUM_SSA_RUNS))], names=['timepoint', 'simulation'])
@@ -270,7 +271,7 @@ for tnf_title, dose in TNF_LOOP:
     #             run_slice = run.loc[[(sim_num, t_point)], [obs.name]]
     #             conc = run_slice.values[0]
     #             df_dens_plot.loc[[(t_point, sim_num)], [obs.name]] = conc
-    #
+
     # # Plot dataframe
     # for t_point in all_times:
     #     for obs in model.observables:
@@ -292,6 +293,8 @@ for tnf_title, dose in TNF_LOOP:
     #         plt.title('%s at %d Hours' % (obs.name, t_point / 60), fontsize=18)
     #         pdf_name = path + 'run5_%d_KDE_%dhrs_%s.png' % (dose, t_point / 60, obs.name)
     #         plt.savefig(pdf_name, bbox_inches='tight')
+
+    ##Plot Percentage of observable at 0 molecules/cell
 
     # #DETERMINE ODE VALUE OF VARIABLE TIME POINT USED ABOVE
     # for t_point in all_times:
