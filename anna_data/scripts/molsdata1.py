@@ -413,6 +413,7 @@ for key in keys:
                         #ax.errorbar(datalist[0]['time'][i], avg_list[i], yerr=((tot / grps[n])**0.5) / grps[n]**0.5,color='red',capsize=5)
 
                 c = next(color)
+                print(avg_list)
                 ax.plot(datalist[0]['time'],avg_list,color=cols[n],linestyle='-',marker='',label=grpnames[n],linewidth=1.5)
                 #ax.plot(datalist[0]['time'],avg_list,color=c,linestyle='-',marker='',label=grpnames[n],linewidth=1)
                 index += grps[n]
@@ -421,7 +422,7 @@ for key in keys:
         for obs in model.observables:
             # Crappy quick fix, but observables must be in same order in model as in data files
             if key == keys[int(obs.name.replace('O_',''))]:
-                # ax.plot(tspan/60, ssa_avg.loc[:, obs.name]/ariella_norms[key], color='mediumpurple', label='SSA Avg',linewidth=1.5)
+                ax.plot(tspan/60, ssa_avg.loc[:, obs.name]/ariella_norms[key], color='mediumpurple', label='SSA Avg',linewidth=1.5)
                 ax.plot(tspan/60, ode_sim_res.observables[obs.name]/ariella_norms[key], color = 'black',linestyle=':',label='ODE',linewidth=3)
                 break
 
