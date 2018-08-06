@@ -385,7 +385,7 @@ for key in keys:
                     for j in range(grps[n]):
                         tot += datalist[j+index][key][i]
                         count += 1
-                    avg = tot / count
+                    avg = float(tot) / count
                     avg_list.append(avg)
                 loops = 0
                 for i in range(len(avg_list)):
