@@ -374,7 +374,7 @@ for key in keys:
             grpnames = ['Smol, Membrane','Smol, No membrane']
             cols = ['tomato','cornflowerblue']
             #cols = ['navy', 'indigo', 'darkorange']
-            grps = [60,10]
+            grps = [60, 42]
             index = 0
             for n in range(len(grps)):
                 avg_list = []

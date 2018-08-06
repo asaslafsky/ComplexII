@@ -220,8 +220,9 @@ plt.ioff()
 path = '/Users/ariella/PycharmProjects/ComplexII/'
 
 #RUN THROUGH EACH AMOUNT OF TNF: HOW DOES THAT AFFECT SSA VS ODE
-TNF_LOOP = [('100 ng/ml TNF', 9390), ('30 ng/ml TNF', 2817), ('10 ng/ml TNF', 939), ('1 ng/ml TNF', 94), ('.1 ng/ml TNF', 9)]
+# TNF_LOOP = [('100 ng/ml TNF', 9390), ('30 ng/ml TNF', 2817), ('10 ng/ml TNF', 939), ('1 ng/ml TNF', 94), ('.1 ng/ml TNF', 9)]
 
+TNF_LOOP = [('1 ng/ml TNF', 94), ('.1 ng/ml TNF', 9)]
 
 for tnf_title, dose in TNF_LOOP:
 
