@@ -423,7 +423,7 @@ for key in keys:
         for obs in model.observables:
             # Crappy quick fix, but observables must be in same order in model as in data files
             if key == keys[int(obs.name.replace('O_',''))]:
-                ax.plot(tspan/60, ssa_avg.loc[:, obs.name]/ariella_norms[key], color='mediumpurple', label='SSA Avg',linewidth=1.5)
+                ax.plot(tspan/60, ssa_avg.loc[:, obs.name]/ariella_norms[key], color='gold', label='SSA Avg',linewidth=1.5)
                 ax.plot(tspan/60, ode_sim_res.observables[obs.name]/ariella_norms[key], color = 'black',linestyle=':',label='ODE',linewidth=3)
                 break
 
