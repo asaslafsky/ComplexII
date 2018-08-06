@@ -176,7 +176,7 @@ Rule('C8a_truncates_BID', C8(fadd=None, flip=None, bid=10, mod='a') % BID(c8=10,
 
 
 #Initial Conditions
-Parameter('TNF_0', 9390)#2326     #698 is 30ng/ml of TNF
+Parameter('TNF_0', 939)#2326     #698 is 30ng/ml of TNF
 Parameter('TNFR_0', 4800)#4800    #0.00246
 Parameter('TRADD_0', 9000)#9000
 Parameter('RIP1_0', 40000)#random.randint(400, 400000)  #47000 0.04
