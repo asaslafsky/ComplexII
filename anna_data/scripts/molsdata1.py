@@ -388,6 +388,7 @@ for key in keys:
                     avg = tot / count
                     avg_list.append(avg)
                 loops = 0
+                print(avg_list)
                 for i in range(len(avg_list)):
                     tot = 0
                     if True:
@@ -413,7 +414,6 @@ for key in keys:
                         #ax.errorbar(datalist[0]['time'][i], avg_list[i], yerr=((tot / grps[n])**0.5) / grps[n]**0.5,color='red',capsize=5)
 
                 c = next(color)
-                print(avg_list)
                 ax.plot(datalist[0]['time'],avg_list,color=cols[n],linestyle='-',marker='',label=grpnames[n],linewidth=1.5)
                 #ax.plot(datalist[0]['time'],avg_list,color=c,linestyle='-',marker='',label=grpnames[n],linewidth=1)
                 index += grps[n]
