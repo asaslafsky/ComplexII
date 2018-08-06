@@ -388,7 +388,6 @@ for key in keys:
                     avg = tot / count
                     avg_list.append(avg)
                 loops = 0
-                print(avg_list)
                 for i in range(len(avg_list)):
                     tot = 0
                     if True:
@@ -401,15 +400,17 @@ for key in keys:
                     loops += 1
 
                 # NORMALIZE AVG_LIST HERE
+                print(avg_list)
                 for i in range(len(avg_list)):
                     avg_list[i] = normalize(avg_list[i],key)
+                print(avg_list)
 
-                erlow=[]
-                for i in range(len(ster)):
-                    erlow.append(avg_list[i]-ster[i])
-                erhigh=[]
-                for i in range(len(ster)):
-                    erhigh.append(avg_list[i]+ster[i])
+                # erlow=[]
+                # for i in range(len(ster)):
+                #     erlow.append(avg_list[i]-ster[i])
+                # erhigh=[]
+                # for i in range(len(ster)):
+                #     erhigh.append(avg_list[i]+ster[i])
                         #ax.fill_between(datalist[0]['time'][i], avg_list[i]-ster, avg_list[i]+ster,alpha=0.2, edgecolor='#1B2ACC', facecolor='#089FFF') #, antialiased=True)
                         #ax.errorbar(datalist[0]['time'][i], avg_list[i], yerr=((tot / grps[n])**0.5) / grps[n]**0.5,color='red',capsize=5)
 
